@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>UniFlow - Admin</title>
+</head>
+<body class="bg-slate-900">
+
+    <!-- HEADER -->
+    <header class="bg-slate-800 text-white">
+        <nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8" aria-label="Top">
+            <div class="w-full py-4 flex items-center justify-between">
+                <div class="flex items-center">
+                    <a href="#" class="text-lg font-semibold">UniFlow - Admin</a>
+                </div>
+
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="#" class="hover:underline">Home</a>
+                    <a href="#" class="hover:underline">Students</a>
+                    <a href="#" class="hover:underline">Users</a>
+                    <a href="#" class="hover:underline">Settings</a>
+                </div>
+
+                <!-- Desktop profile -->
+                <div class="relative" id="profile-desktop">
+                    <button id="profile-toggle" class="flex items-center gap-2 p-1 rounded-full hover:bg-slate-700">
+                        <img src="https://www.gravatar.com/avatar/?d=mp&s=32" class="w-8 h-8 rounded-full">
+                    </button>
+
+                    <div id="profile-menu" class="hidden absolute right-0 mt-2 w-40 bg-white text-slate-800 rounded shadow-lg z-20">
+                        <a href="#" class="block px-4 py-2 hover:bg-slate-100">More</a>
+                        <a href="#" class="block px-4 py-2 hover:bg-slate-100 text-red-600">Logout</a>
+                    </div>
+                </div>
+
+                <!-- Mobile -->
+                <div class="md:hidden flex items-center gap-2">
+                    <div class="relative">
+                        <button id="mobile-profile-toggle" class="p-1 rounded-full hover:bg-slate-700">
+                            <img src="https://www.gravatar.com/avatar/?d=mp&s=28" class="w-7 h-7 rounded-full">
+                        </button>
+
+                        <div id="mobile-profile-menu" class="hidden absolute right-0 mt-2 w-40 bg-white text-slate-800 rounded shadow-lg z-20">
+                            <a href="#" class="block px-4 py-2 hover:bg-slate-100">More</a>
+                            <a href="#" class="block px-4 py-2 hover:bg-slate-100 text-red-600">Logout</a>
+                        </div>
+                    </div>
+
+                    <!-- Hamburger -->
+                    <button id="nav-toggle" class="p-2 rounded-md text-white hover:bg-slate-700">
+                        <svg id="icon-open" class="h-6 w-6" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                        <svg id="icon-close" class="h-6 w-6 hidden" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div id="mobile-menu" class="md:hidden hidden">
+                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                    <a href="#" class="block px-3 py-2 rounded-md hover:bg-slate-700">Home</a>
+                    <a href="#" class="block px-3 py-2 rounded-md hover:bg-slate-700">Students</a>
+                    <a href="#" class="block px-3 py-2 rounded-md hover:bg-slate-700">Users</a>
+                    <a href="#" class="block px-3 py-2 rounded-md hover:bg-slate-700">Settings</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- MAIN -->
+    <main class="max-w-6xl mx-auto p-6">
+
+        <!-- Students -->
+        <section aria-labelledby="students-heading">
+            <h2 id="students-heading" class="text-2xl font-semibold text-white mb-4">Students</h2>
+
+            <div id="students-app" class="bg-slate-700 p-4 rounded">
+                <div id="students-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            </div>
+        </section>
+
+
+    </main>
+
+    <!-- NAV + PROFILE SCRIPT -->
+    <script>
+        const navToggle = document.getElementById('nav-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const iconOpen = document.getElementById('icon-open');
+        const iconClose = document.getElementById('icon-close');
+
+        navToggle.addEventListener('click', () => {
+            const hidden = mobileMenu.classList.contains('hidden');
+            mobileMenu.classList.toggle('hidden', !hidden);
+            iconOpen.classList.toggle('hidden');
+            iconClose.classList.toggle('hidden');
+        });
+
+        const profileToggle = document.getElementById('profile-toggle');
+        const profileMenu = document.getElementById('profile-menu');
+        profileToggle.addEventListener('click', e => {
+            e.stopPropagation();
+            profileMenu.classList.toggle('hidden');
+        });
+
+        const mobileProfileToggle = document.getElementById('mobile-profile-toggle');
+        const mobileProfileMenu = document.getElementById('mobile-profile-menu');
+        mobileProfileToggle.addEventListener('click', e => {
+            e.stopPropagation();
+            mobileProfileMenu.classList.toggle('hidden');
+        });
+
+        document.addEventListener('click', e => {
+            if (!e.target.closest('#profile-desktop')) profileMenu.classList.add('hidden');
+            if (!e.target.closest('#mobile-profile-toggle') && !e.target.closest('#mobile-profile-menu')) mobileProfileMenu.classList.add('hidden');
+        });
+    </script>
+
+    <!-- AJAX + ERROR HANDLING -->
+    <script>
+        const studentsContainer = document.getElementById('students-container');
+        const url = 'https://randomuser.me/api/?results=10&nat=in';
+
+        function showMessage(msg, color = "text-red-400") {
+            studentsContainer.innerHTML = `<p class="col-span-full ${color}">${msg}</p>`;
+        }
+
+        function renderStudents(list) {
+            if (!list?.length) return showMessage("No students found.", "text-white");
+
+            studentsContainer.innerHTML = list.map(s => `
+                <div class="bg-white text-slate-800 p-4 rounded shadow flex items-center gap-4">
+                    <img src="${s.picture.medium}" class="w-14 h-14 rounded-full">
+                    <div>
+                        <div class="font-semibold">${s.name.title} ${s.name.first} ${s.name.last}</div>
+                        <div class="text-sm text-slate-600">${s.email}</div>
+                        <div class="text-sm text-slate-500">${s.location.city}, ${s.location.state}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadStudents() {
+            showMessage("Loading...", "text-white");
+
+            const xhr = new XMLHttpRequest();
+            xhr.open("GET", url);
+            xhr.timeout = 8000;
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState !== 4) return;
+
+                const status = xhr.status;
+
+                if (status === 200) {
+                    const data = JSON.parse(xhr.responseText);
+                    return renderStudents(data.results);
+                }
+                if (status === 400) return showMessage("400: Bad Request");
+                if (status === 401 || status === 403)
+                    return showMessage(`${status}: Unauthorized <br><a class="underline" href="/">Go Back</a>`);
+                if (status === 404) return showMessage("404: Endpoint Not Found");
+                if (status === 500) return showMessage("500: Internal Server Error");
+                return showMessage(`Unexpected Error (${status})`);
+            };
+
+            xhr.onerror = () => showMessage("Network Error: Check your connection.");
+            xhr.ontimeout = () => showMessage("Timeout: Server took too long to respond.");
+
+            xhr.send();
+        }
+
+        loadStudents();
+    </script>
+
+</body>
+</html>
